@@ -93,7 +93,3 @@ export class GamesController {
     return this.gamesService.remove(+id);
   }
 }
-
-
-
-
