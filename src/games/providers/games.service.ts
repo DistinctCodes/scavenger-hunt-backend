@@ -1,5 +1,6 @@
 import {
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
@@ -73,5 +74,24 @@ export class GamesService {
     return game;
   }
 
-  
+    async findBySlug(slug: string): Promise<Game> {
+    const game = await this.gamesRepository.findOne({
+      where: { slug },
+      relations: ['categories'],
+    });
+
+    if (!game) {
+      throw new NotFoundException(`Game with slug '${slug}' not found`);
+    }
+
+    return game;
+  }
+
+   async remove(id: number): Promise<void> {
+    const result = await this.gamesRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Game with ID ${id} not found`);
+    }
+  }
 }

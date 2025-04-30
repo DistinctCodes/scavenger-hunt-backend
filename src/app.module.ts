@@ -10,7 +10,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { StaticModule } from './common/static/static.module';
 import { UserProfile } from './users/user-profile.entity';
 import { User } from './users/users.entity';
-import { GameProgressModule } from './game-progress/game-progress.module';
 
 @Module({
   imports: [
@@ -39,7 +38,6 @@ import { GameProgressModule } from './game-progress/game-progress.module';
     UsersModule,
     AuthModule,
     StaticModule,
-    GameProgressModule,
   ],
   controllers: [AppController],
   providers: [AppService,
