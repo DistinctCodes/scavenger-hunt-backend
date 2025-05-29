@@ -9,8 +9,9 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { StaticModule } from './common/static/static.module';
 import { UserProfile } from './users/user-profile.entity';
 import { User } from './users/users.entity';
-import { GameProgressModule } from './game-progress/game-progress.module';
+// import { GameProgressModule } from './game-progress/game-progress.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PuzzleDependencyModule } from './puzzle-dependency/puzzle_module';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     UsersModule,
     AuthModule,
     StaticModule,
-    GameProgressModule,
+    // GameProgressModule,
+    PuzzleDependencyModule,
   ],
   controllers: [AppController],
   providers: [
