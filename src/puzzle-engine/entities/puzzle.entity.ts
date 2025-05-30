@@ -1,3 +1,7 @@
+
+
+@Entity()
+
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Game } from '../../games/entities/game.entity';
 
@@ -5,6 +9,7 @@ import { Game } from '../../games/entities/game.entity';
 export class Puzzle {
   @PrimaryGeneratedColumn()
   id: number;
+
 
   @Column({ length: 255 })
   name: string;
