@@ -14,6 +14,7 @@ import { NftReward } from './nft-reward/nft-reward.entity';
 import { NftRewardModule } from './nft-reward/nft-reward.module';
 import { GamesModule } from './games/games.module';
 import { PuzzleModule } from './puzzle/puzzle.module';
+import { ImpersonationModule } from './impersonation/impersonation.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { PuzzleModule } from './puzzle/puzzle.module';
     NftRewardModule,
     GamesModule,
     PuzzleModule,
+    ImpersonationModule,
   ],
   controllers: [AppController],
   providers: [

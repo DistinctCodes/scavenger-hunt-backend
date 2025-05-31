@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
 export interface TokenPayload {
-    isRefreshToken?: boolean;
-    sub: string;
-    email: string;
-    roles?: string[];
+  isRefreshToken?: boolean;
+  sub: string;
+  email: string;
+  roles?: string[];
 }
 
 export interface TokenResponse {
@@ -31,7 +32,10 @@ export class TokenService {
       { ...payload, isRefreshToken: true },
       {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION', '7d'),
+        expiresIn: this.configService.get<string>(
+          'JWT_REFRESH_EXPIRATION',
+          '7d',
+        ),
       },
     );
   }
@@ -59,7 +63,7 @@ export class TokenService {
 
   private getTokenExpiration(): number {
     const expiration = this.configService.get<string>('JWT_EXPIRATION', '15m');
-    
+
     // Convert time format to seconds
     if (expiration.endsWith('m')) {
       return parseInt(expiration) * 60;
@@ -68,7 +72,7 @@ export class TokenService {
     } else if (expiration.endsWith('d')) {
       return parseInt(expiration) * 60 * 60 * 24;
     }
-    
+
     return parseInt(expiration);
   }
 }

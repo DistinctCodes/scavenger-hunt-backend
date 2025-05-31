@@ -43,6 +43,6 @@ import { User } from 'src/users/users.entity';
       useClass: BcryptProvider, // Using BcryptProvider as the implementation
     },
   ],
-  exports: [AuthService, TokenService, JwtAuthGuard],
+  exports: [AuthService, TokenService, JwtAuthGuard, JwtModule],
 })
 export class AuthModule {}

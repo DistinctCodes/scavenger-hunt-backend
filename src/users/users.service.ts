@@ -6,7 +6,11 @@ export class UsersService {
   private users: User[] = [];
 
   async findByEmail(email: string): Promise<User | undefined> {
-    return this.users.find(user => user.email === email);
+    return this.users.find((user) => user.email === email);
+  }
+
+  async findById(id: number): Promise<User | undefined> {
+    return this.users.find((user) => user.id === id);
   }
 
   async create(userData: Partial<User>): Promise<User> {
