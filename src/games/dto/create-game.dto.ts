@@ -1,55 +1,61 @@
-import { IsString, IsOptional, IsBoolean, IsEnum, IsInt, IsArray, Min, ArrayNotEmpty } from "class-validator"
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { GameDifficulty } from "../entities/game.entity"
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsArray,
+  Min,
+  ArrayNotEmpty,
+  IsNumber,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { GameDifficulty } from '../entities/game.entity';
 
 export class CreateGameDto {
-  @ApiProperty({ description: "Game name" })
+  @ApiProperty({ description: 'Game name' })
   @IsString()
-  name: string
+  name: string;
 
-  @ApiPropertyOptional({ description: "Game description" })
-  @IsString()
-  @IsOptional()
-  description?: string
-
-  @ApiProperty({ description: "Game slug for URLs" })
-  @IsString()
-  slug: string
-
-  @ApiPropertyOptional({ description: "Cover image URL" })
+  @ApiPropertyOptional({ description: 'Game description' })
   @IsString()
   @IsOptional()
-  coverImage?: string
+  description?: string;
 
-  @ApiPropertyOptional({ description: "Whether the game is active" })
+  @ApiProperty({ description: 'Game slug for URLs' })
+  @IsString()
+  slug: string;
+
+  @ApiPropertyOptional({ description: 'Cover image URL' })
+  @IsString()
+  @IsOptional()
+  coverImage?: string;
+
+  @ApiPropertyOptional({ description: 'Whether the game is active' })
   @IsBoolean()
   @IsOptional()
-  isActive?: boolean = true
+  isActive?: boolean = true;
 
-  @ApiPropertyOptional({ description: "Whether the game is featured" })
+  @ApiPropertyOptional({ description: 'Whether the game is featured' })
   @IsBoolean()
   @IsOptional()
-  isFeatured?: boolean = false
+  isFeatured?: boolean = false;
 
   @ApiPropertyOptional({
-    description: "Game difficulty level",
+    description: 'Game difficulty level',
     enum: GameDifficulty,
     default: GameDifficulty.INTERMEDIATE,
   })
   @IsEnum(GameDifficulty)
-  @IsOptional()
-  difficulty?: GameDifficulty = GameDifficulty.INTERMEDIATE
+  difficulty: GameDifficulty;
 
-  @ApiPropertyOptional({ description: "Estimated completion time in minutes" })
-  @IsInt()
-  @Min(1)
+  @ApiPropertyOptional({ description: 'Estimated completion time in minutes' })
+  @IsNumber()
   @IsOptional()
-  estimatedCompletionTime?: number
+  estimatedCompletionTime?: number;
 
-  @ApiPropertyOptional({ description: "Category IDs for the game" })
+  @ApiPropertyOptional({ description: 'Category IDs for the game' })
   @IsArray()
-  @ArrayNotEmpty()
-  @IsInt({ each: true })
   @IsOptional()
-  categoryIds?: number[]
+  categoryIds?: string[];
 }

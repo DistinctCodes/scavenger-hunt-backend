@@ -24,140 +24,93 @@ import { GameFilterDto } from '../dto/game-filter.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateGameDto } from '../dto/create-game.dto';
 import { UpdateGameDto } from '../dto/update-game.dto';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '../../common/enums/roles.enum';
 
-@ApiTags('games')
+@ApiTags('Games')
+@ApiBearerAuth()
 @Controller('games')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.DEVELOPER, Role.ADMIN)
 export class GamesController {
   constructor(private readonly gamesService: GamesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new game' })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    description: 'The game has been successfully created.',
-  })
   create(@Body() createGameDto: CreateGameDto) {
     return this.gamesService.create(createGameDto);
   }
 
-
   @Get()
-  @ApiOperation({ summary: 'Get all games with optional filtering' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Return all games that match the filter criteria.',
-  })
+  @ApiOperation({ summary: 'Get all games' })
   findAll(@Query() filterDto: GameFilterDto) {
     return this.gamesService.findAll(filterDto);
   }
 
-    @Get('featured')
+  @Get('featured')
   @ApiOperation({ summary: 'Get featured games' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Return all featured games.',
-  })
   findFeatured() {
     return this.gamesService.findFeatured();
   }
 
-    @Get(':id')
+  @Get(':id')
   @ApiOperation({ summary: 'Get a game by ID' })
-  @ApiParam({ name: 'id', description: 'Game ID' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Return the game with the specified ID.',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Game not found.',
-  })
+  @ApiParam({ name: 'id', type: 'string' })
   findOne(@Param('id') id: string) {
-    return this.gamesService.findOne(+id);
+    return this.gamesService.findOne(id);
   }
 
-    @Get('slug/:slug')
+  @Get('slug/:slug')
   @ApiOperation({ summary: 'Get a game by slug' })
-  @ApiParam({ name: 'slug', description: 'Game slug' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Return the game with the specified slug.',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Game not found.',
-  })
+  @ApiParam({ name: 'slug', type: 'string' })
   findBySlug(@Param('slug') slug: string) {
     return this.gamesService.findBySlug(slug);
   }
 
-    @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
   @ApiOperation({ summary: 'Delete a game' })
-  @ApiParam({ name: 'id', description: 'Game ID' })
-  @ApiResponse({
-    status: HttpStatus.NO_CONTENT,
-    description: 'The game has been successfully deleted.',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Game not found.',
-  })
-  @ApiBearerAuth()
+  @ApiParam({ name: 'id', type: 'string' })
   remove(@Param('id') id: string) {
-    return this.gamesService.remove(+id);
+    return this.gamesService.remove(id);
   }
 
-    @Get(':id/stats')
+  @Get(':id/stats')
   @ApiOperation({ summary: 'Get game statistics' })
-  @ApiParam({ name: 'id', description: 'Game ID' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Return statistics for the specified game.',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Game not found.',
-  })
+  @ApiParam({ name: 'id', type: 'string' })
   getGameStats(@Param('id') id: string) {
-    return this.gamesService.getGameStats(+id);
+    return this.gamesService.getGameStats(id);
   }
 
-    @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
   @ApiOperation({ summary: 'Update a game' })
-  @ApiParam({ name: 'id', description: 'Game ID' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'The game has been successfully updated.',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Game not found.',
-  })
-  @ApiBearerAuth()
-  update(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto) {
-    return this.gamesService.update(+id, updateGameDto);
+  @ApiParam({ name: 'id', type: 'string' })
+  update(
+    @Param('id') id: string,
+    @Body() updateGameDto: UpdateGameDto,
+  ) {
+    return this.gamesService.update(id, updateGameDto);
   }
 
   @Post(':id/recalculate-stats')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Recalculate game statistics' })
-  @ApiParam({ name: 'id', description: 'Game ID' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Game statistics recalculated successfully.',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Game not found.',
-  })
-  @ApiBearerAuth()
+  @ApiParam({ name: 'id', type: 'string' })
   recalculateGameStats(@Param('id') id: string) {
-    return this.gamesService.recalculateGameStats(+id);
+    return this.gamesService.recalculateGameStats(id);
+  }
+
+  @Post(':id/reset')
+  @ApiOperation({ summary: 'Reset a game' })
+  @ApiParam({ name: 'id', type: 'string' })
+  resetGame(@Param('id') id: string) {
+    return this.gamesService.resetGame(id);
+  }
+
+  @Post('user/:userId/reset')
+  @ApiOperation({ summary: 'Reset all games for a user' })
+  @ApiParam({ name: 'userId', type: 'string' })
+  resetUserGames(@Param('userId') userId: string) {
+    return this.gamesService.resetUserGames(userId);
   }
 }
 

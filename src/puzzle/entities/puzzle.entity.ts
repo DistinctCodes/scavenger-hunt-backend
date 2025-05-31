@@ -1,12 +1,12 @@
-import { Game } from 'src/games/entities/game.entity';
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
+  ManyToOne,
 } from 'typeorm';
+import { Game } from '../../games/entities/game.entity';
 
 export enum PuzzleDifficulty {
   EASY = 'easy',
@@ -15,19 +15,16 @@ export enum PuzzleDifficulty {
   EXPERT = 'expert',
 }
 
-@Entity()
+@Entity('puzzles')
 export class Puzzle {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   title: string;
 
   @Column('text')
-  clues: string;
-
-  @Column('text', { array: true, default: [] })
-  tags: string[];
+  description: string;
 
   @Column({
     type: 'enum',
@@ -36,15 +33,24 @@ export class Puzzle {
   })
   difficulty: PuzzleDifficulty;
 
-  @Column('tsvector', { nullable: true })
-  searchVector: string;
+  @Column('jsonb', { nullable: true })
+  solution: any;
 
-  @OneToMany(() => Game, (game) => game.puzzles)
-  game: Game[];
+  @Column('jsonb', { nullable: true })
+  hints: string[];
 
-  @CreateDateColumn()
+  @Column({ name: 'is_active', default: true })
+  isActive: boolean;
+
+  @Column({ name: 'game_id', nullable: true })
+  gameId: string;
+
+  @ManyToOne(() => Game, (game) => game.puzzles)
+  game: Game;
+
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

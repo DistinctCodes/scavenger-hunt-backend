@@ -1,16 +1,17 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
-  OneToMany,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
-
+import { User } from '../../users/entities/user.entity';
 import { GameCategory } from './game-category.entity';
-import { Puzzle } from 'src/puzzle/entities/puzzle.entity';
+import { Puzzle } from '../../puzzle/entities/puzzle.entity';
 
 export enum GameDifficulty {
   BEGINNER = 'beginner',
@@ -21,17 +22,17 @@ export enum GameDifficulty {
 
 @Entity('games')
 export class Game {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ length: 255 })
+  @Column()
   name: string;
-
-  @Column({ type: 'text', nullable: true })
-  description: string;
 
   @Column({ unique: true })
   slug: string;
+
+  @Column({ type: 'text', nullable: true })
+  description: string;
 
   @Column({ name: 'cover_image', nullable: true })
   coverImage: string;
@@ -50,13 +51,31 @@ export class Game {
   difficulty: GameDifficulty;
 
   @Column({ name: 'estimated_completion_time', nullable: true })
-  estimatedCompletionTime: number; // in minutes
+  estimatedCompletionTime: number;
 
   @Column({ name: 'total_puzzles', default: 0 })
   totalPuzzles: number;
 
   @Column({ name: 'total_points', default: 0 })
   totalPoints: number;
+
+  @Column()
+  userId: string;
+
+  @ManyToOne(() => User)
+  user: User;
+
+  @Column({ default: 'pending' })
+  status: string;
+
+  @Column({ default: 1 })
+  currentLevel: number;
+
+  @Column({ default: 0 })
+  score: number;
+
+  @Column('jsonb', { default: [] })
+  completedPuzzles: string[];
 
   @ManyToMany(() => GameCategory)
   @JoinTable({

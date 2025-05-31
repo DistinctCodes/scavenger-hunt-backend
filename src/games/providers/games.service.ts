@@ -17,59 +17,50 @@ import { Puzzle } from 'src/puzzle/entities/puzzle.entity';
 export class GamesService {
   constructor(
     @InjectRepository(Game)
-    private readonly gamesRepository: Repository<Game>,
+    private readonly gameRepository: Repository<Game>,
 
     @InjectRepository(Puzzle)
     private readonly puzzlesRepository: Repository<Puzzle>,
 
     @InjectRepository(GameCategory)
-    private readonly categoriesRepository: Repository<GameCategory>,
+    private readonly categoryRepository: Repository<GameCategory>,
   ) {}
 
   async create(createGameDto: CreateGameDto): Promise<Game> {
-    // Check if slug already exists
-    const existingGame = await this.gamesRepository.findOne({
+    // Check if game with same slug exists
+    const existingGame = await this.gameRepository.findOne({
       where: { slug: createGameDto.slug },
     });
 
     if (existingGame) {
-      throw new ConflictException(
-        `Game with slug '${createGameDto.slug}' already exists`,
-      );
+      throw new ConflictException('Game with this slug already exists');
     }
 
-    // Create new game entity
-    const game = this.gamesRepository.create({
+    const game = this.gameRepository.create({
       name: createGameDto.name,
-      description: createGameDto.description,
       slug: createGameDto.slug,
-      coverImage: createGameDto.coverImage,
-      isActive: createGameDto.isActive,
-      isFeatured: createGameDto.isFeatured,
+      description: createGameDto.description,
       difficulty: createGameDto.difficulty,
       estimatedCompletionTime: createGameDto.estimatedCompletionTime,
+      coverImage: createGameDto.coverImage,
+      isActive: createGameDto.isActive ?? true,
+      isFeatured: createGameDto.isFeatured ?? false,
     });
 
-    // Add categories if provided
-    if (createGameDto.categoryIds && createGameDto.categoryIds.length > 0) {
-      const categories = await this.categoriesRepository.find({
-        where: { id: In(createGameDto.categoryIds) },
-      });
-
-      if (categories.length !== createGameDto.categoryIds.length) {
-        throw new NotFoundException('One or more categories not found');
-      }
-
+    if (createGameDto.categoryIds) {
+      const categories = await this.categoryRepository.findByIds(
+        createGameDto.categoryIds,
+      );
       game.categories = categories;
     }
 
-    return this.gamesRepository.save(game);
+    return this.gameRepository.save(game);
   }
 
   async findAll(filterDto: GameFilterDto): Promise<Game[]> {
     const { search, difficulty, isActive, isFeatured, categoryIds } = filterDto;
 
-    const queryBuilder = this.gamesRepository
+    const queryBuilder = this.gameRepository
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.categories', 'category');
 
@@ -106,15 +97,15 @@ export class GamesService {
   }
 
   async findFeatured(): Promise<Game[]> {
-    return this.gamesRepository.find({
+    return this.gameRepository.find({
       where: { isFeatured: true, isActive: true },
       relations: ['categories'],
       order: { name: 'ASC' },
     });
   }
 
-  async findOne(id: number): Promise<Game> {
-    const game = await this.gamesRepository.findOne({
+  async findOne(id: string): Promise<Game> {
+    const game = await this.gameRepository.findOne({
       where: { id },
       relations: ['categories'],
     });
@@ -127,27 +118,24 @@ export class GamesService {
   }
 
   async findBySlug(slug: string): Promise<Game> {
-    const game = await this.gamesRepository.findOne({
+    const game = await this.gameRepository.findOne({
       where: { slug },
       relations: ['categories'],
     });
 
     if (!game) {
-      throw new NotFoundException(`Game with slug '${slug}' not found`);
+      throw new NotFoundException(`Game with slug ${slug} not found`);
     }
 
     return game;
   }
 
-  async remove(id: number): Promise<void> {
-    const result = await this.gamesRepository.delete(id);
-
-    if (result.affected === 0) {
-      throw new NotFoundException(`Game with ID ${id} not found`);
-    }
+  async remove(id: string): Promise<void> {
+    const game = await this.findOne(id);
+    await this.gameRepository.remove(game);
   }
 
-  async getGameStats(id: number): Promise<any> {
+  async getGameStats(id: string): Promise<any> {
     const game = await this.findOne(id);
 
     // Get total puzzles count
@@ -165,7 +153,7 @@ export class GamesService {
     const totalPoints = Number.parseInt(pointsResult.totalPoints) || 0;
 
     // Get user completion stats
-    const progressStats = await this.gamesRepository.query(
+    const progressStats = await this.gameRepository.query(
       `
       SELECT 
         COUNT(DISTINCT user_id) as total_players,
@@ -196,43 +184,44 @@ export class GamesService {
     };
   }
 
-  async update(id: number, updateGameDto: UpdateGameDto): Promise<Game> {
+  async update(id: string, updateGameDto: UpdateGameDto): Promise<Game> {
     const game = await this.findOne(id);
 
-    // Check if slug is being updated and already exists
+    // Check if slug is being changed and if it's already taken
     if (updateGameDto.slug && updateGameDto.slug !== game.slug) {
-      const existingGame = await this.gamesRepository.findOne({
+      const existingGame = await this.gameRepository.findOne({
         where: { slug: updateGameDto.slug },
       });
 
       if (existingGame) {
-        throw new ConflictException(
-          `Game with slug '${updateGameDto.slug}' already exists`,
-        );
+        throw new ConflictException('Game with this slug already exists');
       }
     }
+
+    // Update basic properties
+    Object.assign(game, {
+      name: updateGameDto.name,
+      slug: updateGameDto.slug,
+      description: updateGameDto.description,
+      difficulty: updateGameDto.difficulty,
+      estimatedCompletionTime: updateGameDto.estimatedCompletionTime,
+      coverImage: updateGameDto.coverImage,
+      isActive: updateGameDto.isActive,
+      isFeatured: updateGameDto.isFeatured,
+    });
 
     // Update categories if provided
     if (updateGameDto.categoryIds) {
-      const categories = await this.categoriesRepository.find({
-        where: { id: In(updateGameDto.categoryIds) },
-      });
-
-      if (categories.length !== updateGameDto.categoryIds.length) {
-        throw new NotFoundException('One or more categories not found');
-      }
-
+      const categories = await this.categoryRepository.findByIds(
+        updateGameDto.categoryIds,
+      );
       game.categories = categories;
-      delete updateGameDto.categoryIds;
     }
 
-    // Update the game properties
-    Object.assign(game, updateGameDto);
-
-    return this.gamesRepository.save(game);
+    return this.gameRepository.save(game);
   }
 
-  async recalculateGameStats(id: number): Promise<Game> {
+  async recalculateGameStats(id: string): Promise<Game> {
     const game = await this.findOne(id);
 
     // Get total puzzles count
@@ -253,6 +242,26 @@ export class GamesService {
     game.totalPuzzles = puzzlesCount;
     game.totalPoints = totalPoints;
 
-    return this.gamesRepository.save(game);
+    return this.gameRepository.save(game);
+  }
+
+  async resetGame(gameId: string): Promise<void> {
+    const game = await this.findOne(gameId);
+    game.status = 'pending';
+    game.currentLevel = 1;
+    game.score = 0;
+    game.completedPuzzles = [];
+    await this.gameRepository.save(game);
+  }
+
+  async resetUserGames(userId: string): Promise<void> {
+    const userGames = await this.gameRepository.find({ where: { userId } });
+    for (const game of userGames) {
+      await this.resetGame(game.id);
+    }
+  }
+
+  async count(): Promise<number> {
+    return this.gameRepository.count();
   }
 }

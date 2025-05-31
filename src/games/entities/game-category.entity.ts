@@ -1,7 +1,7 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   ManyToMany,
@@ -10,17 +10,17 @@ import { Game } from './game.entity';
 
 @Entity('game_categories')
 export class GameCategory {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ length: 50, unique: true })
+  @Column({ unique: true })
   name: string;
 
-  @Column({ length: 50, unique: true })
-  slug: string;
-
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: true })
   description: string;
+
+  @Column({ name: 'is_active', default: true })
+  isActive: boolean;
 
   @ManyToMany(() => Game, (game) => game.categories)
   games: Game[];

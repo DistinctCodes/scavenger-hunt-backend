@@ -1,17 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GamesController } from './controllers/games.controller';
-import { GamesService } from './providers/games.service';
+import { GamesService } from './games.service';
 import { Game } from './entities/game.entity';
-import { UsersModule } from '../users/users.module';
-import { Puzzle } from 'src/puzzle/entities/puzzle.entity';
 import { GameCategory } from './entities/game-category.entity';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Game, Puzzle, GameCategory]),
-    UsersModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Game, GameCategory]), UsersModule],
   controllers: [GamesController],
   providers: [GamesService],
   exports: [GamesService],

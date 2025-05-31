@@ -7,8 +7,6 @@ import {
   Param,
   Delete,
   UseGuards,
-  HttpStatus,
-  HttpCode,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,62 +18,55 @@ import {
 import { GameCategoriesService } from '../providers/game-categories.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateCategoryDto } from '../dto/create-category.dto';
+import { UpdateCategoryDto } from '../dto/update-category.dto';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '../../common/enums/roles.enum';
 
-@ApiTags('game-categories')
+@ApiTags('Game Categories')
+@ApiBearerAuth()
 @Controller('game-categories')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.DEVELOPER, Role.ADMIN)
 export class GameCategoriesController {
   constructor(private readonly categoriesService: GameCategoriesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new game category' })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    description: 'The game category has been successfully created.',
-  })
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(createCategoryDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all game categories' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Return all game categories.',
-  })
   findAll() {
     return this.categoriesService.findAll();
   }
 
-    @Get(':id')
+  @Get(':id')
   @ApiOperation({ summary: 'Get a game category by ID' })
-  @ApiParam({ name: 'id', description: 'Category ID' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Return the game category with the specified ID.',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Game category not found.',
-  })
   findOne(@Param('id') id: string) {
-    return this.categoriesService.findOne(+id);
+    return this.categoriesService.findOne(id);
   }
 
-    @Get(':id/games')
-  @ApiOperation({ summary: 'Get games by category' })
-  @ApiParam({ name: 'id', description: 'Category ID' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Return all games in the specified category.',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Game category not found.',
-  })
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update a game category' })
+  update(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
+    return this.categoriesService.update(id, updateCategoryDto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a game category' })
+  remove(@Param('id') id: string) {
+    return this.categoriesService.remove(id);
+  }
+
+  @Get(':id/games')
+  @ApiOperation({ summary: 'Get all games in a category' })
   findGamesByCategory(@Param('id') id: string) {
-    return this.categoriesService.findGamesByCategory(+id);
+    return this.categoriesService.findGamesByCategory(id);
   }
-
 }
