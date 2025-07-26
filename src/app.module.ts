@@ -8,7 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ProgressModule } from './progress/progress.module';
-
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -36,9 +36,11 @@ import { ProgressModule } from './progress/progress.module';
         },
       }),
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UserModule,
     ProgressModule,
+    DailyChallengeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -51,6 +53,7 @@ import { RewardModule } from './reward/reward.module';
 import { ConsentModule } from './consent/consent.module';
 import { DraftReviewModule } from './draft-review/draft-review.module';
 import { ErrorReportModule } from './error-report/error-report.module';
+import { DailyChallengeModule } from './daily-challenge/daily-challenge.module';
 
 @Module({
   imports: [
