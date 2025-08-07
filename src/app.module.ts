@@ -14,6 +14,7 @@ import { TriviaModule } from './trivia/trivia.module';
 import { DailyChallengeModule } from './daily-challenge/daily-challenge.module';
 import { PuzzleUnlockModule } from './puzzle-unlock/puzzle-unlock.module';
 import { ReferralCodeModule } from './referral-code/referral-code.module';
+import { ClaimHistoryModule } from './claim-history/claim-history.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -49,7 +50,8 @@ import { ReferralCodeModule } from './referral-code/referral-code.module';
     ValidatorsModule,
     TriviaModule,
     PuzzleUnlockModule,
-    ReferralCodeModule
+    ReferralCodeModule,
+    ClaimHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
